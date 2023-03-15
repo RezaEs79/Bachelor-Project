@@ -1,6 +1,17 @@
 import pygame
 import math
 import numpy as np
+import satellite
+from satellite import Satellite
+from RSS import CalcRSS
+#
+
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+#
+
+
 pygame.init()
 
 WIDTH, HEIGHT = 800, 800
@@ -20,62 +31,43 @@ LEMON = (0, 220, 128)
 FONT = pygame.font.SysFont("comicsans", 16)
 
 
-class Planet:
-    # TIMESTEP = 3600*24  # 1 day
-    TIMESTEP = 0.1  # 1 day
-
-    def __init__(self, r, radius, color, vel=0.01):
-        self.theta = -math.pi/2
-        self.r = r
-        self.x = self.r * math.sin(self.theta) + WIDTH / 2
-        self.y = self.r * math.sin(self.theta) + HEIGHT / 2
-        self.radius = radius
-        self.color = color
-        self.orbit = []
-        self.earth = False
-        self.distance_to_earth = 0
-
-        self.vel = vel
-        # distance_y = self.r*  math.sin(theta)
-        # distance_x =self.r*  math.cos(theta)
-
-        self.x_vel = self.vel * math.sin(self.theta)
-        self.y_vel = self.vel * math.cos(self.theta)
-
-    def draw(self, win):
-        pygame.draw.circle(win, self.color, (self.x, self.y), self.radius)
-
-        if not self.earth:
-            distance_text = FONT.render(
-                f"{round((self.theta%(2*math.pi))/math.pi -1, 1)} \u03C0", 1, WHITE)
-            win.blit(distance_text, (self.x - distance_text.get_width() /
-                     2, self.y - distance_text.get_height()/2))
-
-    def update_position(self):
-        if not self.earth:
-            self.distance_to_earth = math.sqrt(self.x**2+self.y**2)
-            self.theta += self.vel * self.TIMESTEP
-            self.x = WIDTH / 2 + self.r * math.cos(self.theta)
-            self.y = WIDTH / 2 + self.r * math.sin(self.theta)
-            self.orbit.append((self.x, self.y))
-
-
 def main():
     run = True
     clock = pygame.time.Clock()
+    file_to_delete = open("data.txt",'w')
+    file_to_delete.close()
+    f = open("data.txt", "a")
+    file_to_delete = open("demofile2.txt",'w')
+    file_to_delete.close()
+    fd = open("demofile2.txt", "a")
+    # f.write("3")
+    # earth = Satellite(0, 100, GREEN)
+    # earth.earth = True
 
-    earth = Planet(0, 100, GREEN)
-    earth.earth = True
+    irid1 = Satellite(350, 12, RED, 0.015)
+    irid2 = Satellite(300, 10, LEMON)
+    irid3 = Satellite(380, 8, BLUE, 0.05)
 
-    # irid1 = Planet(350, 12, RED)
-    irid1 = Planet(350, 12, RED, 0.015)
-    # irid1.y_vel = 24.077 * 1000
-    irid2 = Planet(300, 10, LEMON)
-    irid3 = Planet(380, 8, BLUE, 0.02)
-    # mars.y_vel = 24.077 * 1000
+    # satellites = [ irid1, irid2, irid3]
+    satellites = [ irid3]
 
-    planets = [earth, irid1, irid2, irid3]
-    # planets = [earth, earth, mars, mercury, venus]
+    fig, ax = plt.subplots()
+
+    x = np.arange(0, 2*np.pi, 0.01)
+    line, = ax.plot(x, np.sin(x))
+
+
+    def animate(i):
+        line.set_ydata(np.sin(x + i / 50))  # update the data.
+        return line,
+
+
+
+    ani = animation.FuncAnimation(
+        fig, animate, interval=20, blit=True, save_count=50)
+
+    # To save the animation, use e.g.
+
 
     while run:
         clock.tick(60)
@@ -85,17 +77,26 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
 
-        for planet in planets:
-            pygame.draw.circle(WIN, YELLOW, (400, 400), 200)
-            # for i in range (100):
-            #     pass
-                # pygame.draw.circle(WIN,RED, (400+i, 300+i), 1)
-            planet.update_position()
-            planet.draw(WIN)
+        rEarth=200
+        pygame.draw.circle(WIN, YELLOW, (400, 400), rEarth)
+        for satellite in satellites:
+            dist=math.sqrt(rEarth**2+satellite.r**2-2*satellite.r*rEarth*math.cos(math.pi/2-satellite.theta))
+            # sigR=CalcRSS(dist)
+            f.write(str(dist)+"   ")
+            # fd.write(str(sigR)+"   ")
+            # CalcRSS(dist,satellite.vel)
+            satellite.update_position()
+            satellite.draw(WIN)
 
         pygame.display.update()
 
     pygame.quit()
 
 
-main()
+if __name__ == '__main__':
+    main()
+
+
+
+
+
