@@ -1,66 +1,84 @@
 import pygame
 import math
+from math import pi
 import numpy as np
 import matplotlib.pyplot as plt
 pygame.init()
-
 WIDTH, HEIGHT = 800, 800
-
 WHITE = (255, 255, 255)
-YELLOW = (255, 255, 0)
-BLUE = (100, 149, 237)
-GREEN = (0, 128, 0)
-RED = (188, 39, 50)
-DARK_GREY = (80, 78, 81)
-PINK = (255, 128, 128)
-PURPLE = (255, 0, 255)
-INDIGO = (0, 0, 255)
-LEMON = (0, 220, 128)
-FONT = pygame.font.SysFont("comicsans", 16)
+FONT = pygame.font.SysFont("comicsans", 10)
+
 
 class Satellite:
     # TIMESTEP = 3600*24  # 1 day
-    TIMESTEP = 0.1  # 1 day
+    TIMESTEP = 1  # 1 day
+    Satellites_constellation = []
+    object_counter = 10
 
-    def __init__(self, r, radius, color, vel=0.01):
+    def __init__(self, r, greatness, color, vel=0.01):
+        Satellite.Satellites_constellation.append(self)
         self.theta = 0
         self.r = r
         self.x = self.r * math.cos(self.theta) + WIDTH / 2
         self.y = self.r * math.sin(self.theta) + HEIGHT / 2
-        self.radius = radius
+        self.greatness = greatness
         self.color = color
-        self.orbit = []
-        self.earth = False
-        self.distance_to_earth = 0
-
         self.vel = vel
-        # distance_y = self.r*  math.sin(theta)
-        # distance_x =self.r*  math.cos(theta)
+        self.footprint = (-pi/12, pi/12)
+        self.flag = 0
+        self.id = Satellite.object_counter
+        Satellite.object_counter += 1
+        self.orbit = []
+        self.traffic = 10
 
-        self.x_vel = self.vel * math.sin(self.theta)
-        self.y_vel = self.vel * math.cos(self.theta)
-
-    
     def draw(self, win):
-        pygame.draw.circle(win, self.color, (self.x, self.y), self.radius)
-        pygame.draw.arc(win, self.color, (200, 200, 400, 400), self.theta-math.pi/12,self.theta+math.pi/12, 5)
+        if self.flag == 1:
+            pygame.draw.circle(
+                win, self.color, (self.x, self.y), self.greatness)
+        else:
+            pygame.draw.circle(
+                win, self.color, (self.x, self.y), self.greatness, 2)
 
-        if not self.earth:
-            distance_text = FONT.render(
-                f"{round((self.theta/math.pi)%2,2)} \u03C0", 1, WHITE)
-                
-            win.blit(distance_text, (self.x - distance_text.get_width() /
-                     2, self.y - distance_text.get_height()/2))
+        pygame.draw.arc(win, self.color, (200, 200, 400, 400), *self.area, 5)
+        distance_text = FONT.render(
+            f"{round((self.theta/pi)%2,2)} \u03C0", 1, WHITE)
+
+        win.blit(distance_text, (self.x - distance_text.get_width() /
+                                 2, self.y - distance_text.get_height()/2))
 
     def update_position(self):
-        if not self.earth:
-            self.distance_to_earth = math.sqrt(self.x**2+self.y**2)
-            self.theta += self.vel * self.TIMESTEP
-            self.x = WIDTH / 2 + self.r * math.cos(self.theta)
-            self.y = HEIGHT / 2 - self.r * math.sin(self.theta)
-            self.orbit.append((self.x, self.y))
+        self.distance_to_earth = math.sqrt(self.x**2+self.y**2)
+        self.theta += self.vel * self.TIMESTEP
+        self.x = WIDTH / 2 + self.r * math.cos(self.theta)
+        self.y = HEIGHT / 2 - self.r * math.sin(self.theta)
+        self.orbit.append((self.x, self.y))
+        self.area = (self.theta-pi/12, self.theta+pi/12)
+        # Convert arg to Arg
+        divided_tuple = tuple(x / pi for x in self.area)
+        remainder_tuple = tuple(x % 2 for x in divided_tuple)
+        # Checking that the range is proper for (min,max)
+        if remainder_tuple[0] > remainder_tuple[1]:
+            upper_bound = remainder_tuple[1]+2
+        else:
+            upper_bound = remainder_tuple[1]
+        self.footprint = (remainder_tuple[0], upper_bound)
 
+    def shadow(self, list_user):
+        my_attribute_list = [obj.connect_id for obj in list_user]
+        if (self.id in my_attribute_list):
+            self.flag = 1
+        else:
+            self.flag = 0
 
+    def Does_cover_user(self,list_user):
+        my_attribute_list=[obj.alpha for obj in list_user]
+        list_flag=[]
+        # set flag
+        for x in my_attribute_list:
+            if x >= self.footprint[0] and x <= self.footprint[1]:
+                list_flag.append(1)
+            else:
+                list_flag.append(0)
 
-
-
+        self.flag=max(list_flag)
+        list_flag.clear()
