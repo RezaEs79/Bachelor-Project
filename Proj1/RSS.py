@@ -11,8 +11,8 @@ def CalcRSS(distance):
     Po = 38
     grad1 = 2
     grad2 = 2
-    alpha = math.exp(-1/85)
-    sigma1 = math.sqrt(8)
+    alpha = math.exp(-1/200)
+    sigma1 = math.sqrt(2)
     sigma2 = math.sqrt(sigma1**2 * (1 - alpha**2))
     # Path Loss
     RSS01 = Pt - Po - (10 * grad1 * math.log10(distance) +

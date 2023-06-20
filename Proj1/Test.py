@@ -1,21 +1,18 @@
-# import torch
-# print(torch.__version__)
 from satelliteenv import SatelliteEnv
 env = SatelliteEnv()
 env.render_mode='human'
-episodes = 2
+episodes = 50
 # obs = env.reset()
 
 for episode in range(episodes):
     done = False
     obs = env.reset()
-    print("I"*50)
     while not done:#not done:
         random_action = env.action_space.sample()
         # print("action",random_action)
-        obs, reward, done, info = env.step(random_action)
+        obs, reward, done, info = env.step(env.action_space.sample())
         # print('reward',reward)
-        print('obs: ',obs)
+        # print('obs: ',obs)
 
 
 """
