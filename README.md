@@ -59,11 +59,15 @@ To use this project, follow these steps:
 
 - Test the Agent: Evaluate the agent's performance and visualize the results.
 
-<div style="display: flex;">
-  <img src="resources/satellite_Model.gif" alt="GIF 1 (inter SAT)" style="width: 50%;">
-  
-  <img src="resources/spotbeam_Model.gif" alt="GIF 2 (intra SAT)" style="width: 50%;">
-  
+<div style="display: flex; justify-content: space-between;">
+  <div style="text-align: center;">
+    <img src="resources/satellite_Model.gif" alt="GIF 1 (inter SAT)" style="width: 450px;">
+    <p>Simulation of inter Satellite HO</p>
+  </div>
+  <div style="text-align: center;">
+    <img src="resources/spotbeam_Model.gif" alt="GIF 2 (intra SAT)" style="width: 450px;">
+    <p>Simulation of intra Satellite HO</p>
+  </div>
 </div>
 
 
